@@ -1,0 +1,26 @@
+# Chen's Bond - MongoDB Sharded Cluster Analysis Tool
+Chen's Bond is a MongoDB analysis tool designed for the purpose of database management and optimization. It primarily operates by querying the 'config' database, providing users with valuable insights into their MongoDB deployment. The tool is particularly focused on improving the performance and efficiency of MongoDB clusters.
+
+## Scripts
+**Intro:**
+Say hello to "Chen's Bond," your MongoDB cluster buddy! It's like having a best friend for your sharded clusters, here to spill the beans on what's happening in your MongoDB world. Think of it as the secret sauce that brings all your shards together, giving you the inside scoop on your MongoDB setup. With Bond, you're not just keeping an eye on shards; you're simplifying MongoDB sharded cluster analysis!
+
+**Installation:**
+Now, let's talk about setting it up - it's as easy as ordering a pizza on a lazy Sunday. To get started, mosey on over to the Bond GitHub repository and grab that source code. You'll need Git for this, so make sure Git is on your computer. Once you've got the source code, open your terminal or command prompt, go to the downloaded directory, and fire up the "build.sh" script. This script, tested on Linux, macOS, and Windows, is like magic - but you'll also need a Go compiler (version 1.18 or higher) for it to work. If you're on Windows, just use Git Bash and make sure MinGW and the Go compiler are on board before building Bond. The compilation process is faster than a cheetah on roller skates, and voila - Bond is ready to make your MongoDB sharded cluster analysis a breeze!
+
+**Summary Page and Alerts:**
+Time to dive into the good stuff. Bond starts by taking a peek at your MongoDB cluster's configurations and activities - like a detective on a case. It counts your collections; if there are more than 10,000, it gives a friendly wave. It's also the Sherlock Holmes of Mongos versions, sniffing out any version mismatches. Plus, it keeps an eye on your shard setup - making sure the "maxSize" parameter is playing nice. It's like a bouncer at the MongoDB club, ensuring everyone's on the guest list. It even gives the side-eye to the "ActionLog" collection (if it's there) to confirm it's the capped collection it claims to be. Similarly, it gives a thumbs-up to the "ChangeLog" collection, checking that it's in the capped collection club. To top it off, Bond cross-references your cluster's version with MongoDB's recommended upgrade list, offering you a backstage pass to all the juicy details.
+
+Now, let's chat about the Alerts - the part where Bond plays protector. Any issues or red flags it discovers during its detective work are showcased here. It's like your friendly neighborhood superhero, swooping in to save the day by alerting you to potential problems that might need your attention. In a nutshell, Bond is the trusty sidekick you didn't know you needed - always there, always vigilant, making your MongoDB sharded cluster analysis smoother than a well-tuned engine.
+
+**Bug Tracking:**
+Ah, bugs! Even the fanciest software gets 'em, and MongoDB isn't immune. That's where Bond comes to the rescue, like a bug-swatting ninja. It keeps an eye on known issues and recommends upgrades to squash those pesky critters. But here's the fun part - you can join the bug-hunting party by updating the "tickets.json" file with any known problems you've encountered. It's like adding your own bugs to the mix (but in a good way). Inside that file, you'll find not just bug references but also nifty links for juicy bug descriptions. So, whether you're squashing bugs or adding some to the collection, Bond is your trusty sidearm in the wild west of MongoDB sharded cluster maintenance.
+
+**RESTful API:**
+Bond offers a comprehensive and user-friendly feature: a RESTful API that seamlessly provides JSON data for integration with your applications. This API empowers you to effortlessly access and, incorporate essential information from Bond, into your own software solutions, ensuring a harmonious and data-driven MongoDB sharded cluster analysis experience. It's a bridge that, connects Bond with your applications, opening up a world of possibilities for enhancing the functionality and insights of your MongoDB ecosystem.
+
+**Charting Capabilities:**
+Last but not least, let's talk about charts. Visuals are where the party's at, and Bond knows it. While it currently has some cool charting features like chunk splits and migrations, we're here to spill the beans - the charting feature is about to get a makeover that'll make Cinderella jealous. Right now, Bond offers visual snapshots of data migration and distribution, making it easier to understand the rhythm of your database's moves. But hold onto your hats because we've got grand plans to jazz up those charts.
+
+**Thank You:**
+Thanks for watching, and I hope you will enjoy using Chen's Bond to simplify your MongoDB sharded cluster analysis. It's your trusty companion in the world of MongoDB - always here to help you make sense of it all. Happy clustering!

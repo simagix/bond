@@ -1,0 +1,8 @@
+{
+    "SERVER-35092": {"id": "https://jira.mongodb.org/browse/SERVER-35092", "versions": [["3.6.0", "3.6.8"] , ["4.0.0", "4.0.2"]]},
+    "SERVER-45844": {"id": "https://jira.mongodb.org/browse/SERVER-45844", "versions": [["4.0.0", "4.0.19"] , ["4.2.0", "4.2.7"]]},
+    "SERVER-46487": {"id": "https://jira.mongodb.org/browse/SERVER-46487", "versions": [["3.6.0", "4.0.19"] , ["4.2.0", "4.2.7"]]},
+    "SERVER-52654": {"id": "https://jira.mongodb.org/browse/SERVER-52654", "versions": [["4.2.2", "4.2.12"] , ["4.4.0", "4.4.3"]]},
+    "SERVER-55028": {"id": "https://jira.mongodb.org/browse/SERVER-55028", "versions": [["4.2.2", "4.2.22"] , ["4.4.0", "4.4.3"]]},
+    "SERVER-68511": {"id": "https://jira.mongodb.org/browse/SERVER-68511", "versions": [["5.0.0", "5.0.11"] , ["6.0.0", "6.0.1"]]}
+}

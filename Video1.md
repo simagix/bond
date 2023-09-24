@@ -1,0 +1,22 @@
+**Introduction:**
+Introducing "Chen's Bond," an exceptional MongoDB cluster analysis tool, meticulously designed to provide users with an all-encompassing view of their sharded clusters' status. The name "Chen's Bond" symbolizes its role as the glue that unifies individual shards, offering a comprehensive, in-depth perspective of your MongoDB infrastructure. With "Chen's Bond," you not only monitor individual shard health but also seamlessly unite them into a cohesive view, unlocking the full potential of your MongoDB sharded clusters.
+
+**Installation:**
+Now, let's dive into how to set up this powerful tool. Installing Bond is a breeze, requiring just a few straightforward steps. To get started, visit the Bond GitHub repository and download the source code. You'll need Git commands for this, so make sure Git is installed on your system. Once you have the source code, open your terminal or command prompt, navigate to the downloaded directory, and run the provided "build.sh" script. This script, tested on Linux, macOS, and Windows, requires a Go compiler (version 1.18 or higher) to compile Bond. For Windows users, using Git Bash and ensuring MinGW and the Go compiler are installed is crucial before building Bond. The compilation process swiftly generates the Bond executable. Relax as Bond compiles in no time. There you have it—Bond is now installed and ready to streamline your MongoDB log analysis.
+
+**Summary Page and Warnings:**
+Now, let's shift our focus to what Chen's Bond does. It starts with the Summary Page, examining your MongoDB cluster's general information. It also checks the number of collections; if it exceeds 10,000, it raises a flag. Major version mismatches among your Mongos instances are diligently verified. Additionally, the tool ensures the "maxSize" parameter in your shard configuration is correctly set and inspects the "ActionLog" collection (if it exists) to confirm it's configured as a capped collection. Likewise, it reviews the "ChangeLog" collection, ensuring it's configured as a capped collection. Chen's Bond goes the extra mile by cross-referencing your cluster's version with MongoDB's required upgrade list, providing comprehensive insights.
+
+The Warnings section is where issues or discrepancies uncovered during these checks are displayed. This is a crucial aspect of Chen's Bond, promptly alerting you to potential problems that may require attention. In summary, Chen's Bond is your indispensable tool for assessing and ensuring the health, performance, and compliance of your MongoDB cluster, covering critical aspects from basic cluster information to version compatibility.
+
+**Bug Tracking:**
+As all software inevitably contains bugs, MongoDB often recommends upgrades to address these critical issues. Chen's Bond serves as your vigilant ally in this regard, proactively inspecting a selection of these tickets. Additionally, you have the flexibility to augment this list with any known problems by updating the "tickets.json" file. Within this file, you'll find not only ticket references but also convenient links for in-depth issue descriptions.
+
+Chen's Bond ensures you're not caught off guard by known problems that could affect your MongoDB deployment. By allowing you to add your own issues to the list, it empowers you to maintain a highly customized and proactive bug management strategy, ultimately enhancing the reliability and stability of your MongoDB environment.
+
+**Charting Capabilities:**
+Lastly, when it comes to understanding complex data, nothing beats visual representations. Charts offer the distinct advantage of simplifying intricate information. While Chen's Bond currently provides a strong foundation for charting capabilities, we're thrilled to share that this feature will undergo substantial expansion in the future.
+
+Presently, Chen's Bond offers charting functionality for key aspects like chunk splits and migrations within your MongoDB cluster. These charts provide a visual snapshot of critical data migration and distribution patterns, simplifying your comprehension of your database environment's dynamics.
+
+Looking ahead, our development roadmap includes ambitious plans to enhance and diversify our charting capabilities. This will empower you to gain even deeper insights into the performance, health, and trends of your MongoDB clusters. Stay tuned for exciting updates in the world of Chen's Bond as we strive to be your comprehensive MongoDB cluster analysis and management solution.
