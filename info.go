@@ -302,8 +302,8 @@ const (
 	<div style='float: left;'>
 	<table><caption>Bond Tutorial</caption>
 	<tr><td>
-	<iframe width="480" height="270" src="https://www.youtube.com/embed/tdUT_PLiRSs?si=q-WOmdGqwgJV8R0R" 
-		title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; 
+	<iframe width="480" height="270" src="https://www.youtube.com/embed/equz1z0igv0?si=WOcTe34ELeyAFET7"
+		title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope;
 		picture-in-picture; web-share" allowfullscreen></iframe></td></tr></table></div>
 	`
 )
