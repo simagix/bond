@@ -63,12 +63,24 @@ func GetInfoTemplate() (*template.Template, error) {
 			}
 			return template.HTML("<i class='fa fa-check'></i>")
 		},
+		"getCountLabel": func(n int, prefix string) string {
+			printer := message.NewPrinter(language.English)
+			if n > TOP_N {
+				return printer.Sprintf("%s %d of %d", prefix, TOP_N, n)
+			}
+			return printer.Sprintf("%d", n)
+		},
 		"getDurationFromSeconds": func(s int64) string {
 			return gox.GetDurationFromSeconds(float64(s))
 		},
 		"getDurationFromMilliseconds": func(n interface{}) string {
+			if n == nil {
+				return ""
+			}
 			ms := ToInt64(n)
-			if ms < 1000 {
+			if ms == 0 {
+				return ""
+			} else if ms < 1000 {
 				return fmt.Sprintf("%v ms", ms)
 			}
 			return gox.GetDurationFromSeconds(float64(ms) / 1000)
@@ -127,12 +139,12 @@ const (
 	SummaryHTML = `
 	{{$ndbs:=len .Config.Databases}}
 	{{$ncolls:=len .Config.CollectionsMap}}
-	Based on the data from Chen's Bond, the MongoDB cluster is running version {{.Config.MongoVersion}}.  It consists of {{plural (len .Config.ShardsMap) "shard" "s"}} and {{plural (len .Config.Mongos) "mongos instance" "s"}} There are {{plural $ncolls "sharded collection" "s"}} across {{plural $ndbs "database" "s"}}.
+	Based on the data from Chen's Bond, the MongoDB cluster is running version {{.Config.MongoVersion}}.  It consists of {{plural (len .Config.ShardsMap) "shard" "s"}} and {{plural (len .Config.Mongos) "mongos instance" "s"}}. There are {{plural $ncolls "sharded collection" "s"}} across {{plural $ndbs "database" "s"}}.
 	<p/>Please take a moment to review the statistics below.  All misconfigurations or anomalies will be highlighted with <i class="fa fa-warning" style="color: red;"></i> icons. 
 	{{if eq (len .Config.Warnings) 0}}
-	Good news! Chen's Bond didn't find anything goofy from your cluster. But, still,
+	Good news! Bond didn't find anything goofy from your cluster. But, still,
 	{{else}}
-	Chen's Bond has found a few things worth mentioning and they are:
+	Bond has uncovered a few noteworthy findings:
 	<ol>
 	{{range $n, $value := .Config.Warnings}}
 		<li>{{getHTML $value}}</li>
@@ -140,7 +152,7 @@ const (
 	</ol>
 	Be sure to
 	{{end}}
-	review the provided statistics and don't forget to check out the charts to better understand your databases.
+	review the provided statistics and don't forget to check out the charts to better understand the performance of your cluster.
 	`
 
 	// general info
@@ -188,13 +200,13 @@ const (
 {{if gt (len .Config.ShardsMap) 0}}
 	<div style='float: left;'>
 	<table><caption>Shards</caption><tr><th>#</th>
-	<th>Shard Name</th><th>Host</th><th>State</th><th>Chunks</th><th>Jumbo</th><th>Max Size</th>
+	<th>Shard Name</th><th>Host</th><th>State</th><th>Chunks</th><th>Jumbo</th><th>Max Size</th><th>-</th>
 	{{$cnt:=0}}
 	{{range $n, $value := .Config.ShardsMap}}
 		{{$cnt = add $cnt 1}}
 			<tr>
 				<td align='right' class='break'>{{ $cnt }}</td>
-				<td align='left' class='break'>{{ $value.ID }}</td>
+				<td align='left' class='break'>{{$value.ID}}</td>
 				<td align='left' class='break'>{{ $value.Host }}</td>
 				<td align='right' class='break'>{{ $value.State }}</td>
 				<td align='right' class='break'>{{ numPrinter $value.Chunks }}</td>
@@ -204,6 +216,9 @@ const (
 			{{else}}
 				<td align='right' class='break'>{{ $value.MaxSize }} {{getWarningSymbol false}}</td>
 			{{end}}
+				<td align='center'><button class='btn'
+					onClick="javascript:loadData('/bond/chart/shards/{{$value.ID}}'); return false;">
+					<i class='fa fa-pie-chart' style='font-size: .8em;'></i></button></td>
 			</tr>
 	{{end}}
 {{end}}
@@ -221,16 +236,16 @@ const (
 					<td align='right' class='break'>{{ add $n 1 }}</td>
 					<td align='left' class='break'>{{ $value.ID }}</td>
 				{{ if (checkVersion $value.MongoVersion $majorVersion) }}
-					<td align='center' class='break'>{{ $value.MongoVersion }}</td>
+					<td align='center' class='break'>{{$value.MongoVersion}}</td>
 				{{ else }}
-					<td align='center' class='break'><span style='color:red;'>{{ $value.MongoVersion }}</span></td>
+					<td align='center' class='break'>{{$value.MongoVersion}} {{getWarningSymbol false}}</td>
 				{{ end }}
 					<td align='left' class='break'>{{ ISODate $value.Ping }}</td>
 					<td align='right' class='break'>{{ getDurationFromMilliseconds $value.Up }}</td>
 				{{ if $value.Waiting }}
-					<td align='center' class='break'>{{ getCheckMarkSymbol $value.Waiting }}</td>
+					<td align='center' class='break'>{{getCheckMarkSymbol true}}</td>
 				{{ else }}
-					<td align='center' class='break'>{{ getWarningSymbol $value.Waiting }}</td>
+					<td align='center' class='break'>{{getWarningSymbol false}}</td>
 				{{ end }}
 					<td align='left' class='break'>{{ ISODate $value.Created }}</td>
 				</tr>
@@ -242,7 +257,7 @@ const (
 	DatabasesHTML = `
 {{if gt (len .Config.Databases) 0}}
 	<div style='float: left;'>
-	<table><caption>First N of {{ numPrinter (len .Config.Databases) }} Databases</caption><tr><th>#</th>
+	<table><caption>{{getCountLabel (len .Config.Databases) "First"}} Databases</caption><tr><th>#</th>
 	<th>Database Name</th><th>Primary</th><th>Partitioned</th>
 	{{$limit:=.TOP_N}}
 	{{range $n, $value := .Config.Databases}}
@@ -262,18 +277,21 @@ const (
 	CollectionsHTML = `
 {{if gt (len .Collections) 0}}
 	<div style='float: left;'>
-	<table><caption>Top N of {{ numPrinter (len .Collections) }} Sharded Collections</caption><tr><th>#</th>
-	<th>Collection Name</th><th>Shard Key</th><th>Unique</th><th>No Balance</th><th>Chunks</th>
+	<table><caption>{{getCountLabel (len .Collections) "Top"}} Sharded Collections</caption><tr><th>#</th>
+	<th>Collection Name</th><th>Shard Key</th><th>Unique</th><th>No Balance</th><th>Chunks</th><th>-</th>
 	{{$limit:=.TOP_N}}
 	{{range $n, $value := .Collections}}
 		{{if lt $n $limit}}
 			<tr>
 				<td align='right' class='break'>{{ add $n 1 }}</td>
-				<td align='left' class='break'>{{ $value.ID }}</td>
+				<td align='left' class='break'>{{$value.ID}}</td>
 				<td align='left' class='break'>{{ stringify $value.Key }}</td>
 				<td align='center' class='break'>{{ getCheckMarkSymbol $value.Unique }}</td>
 				<td align='center' class='break'>{{ getCheckMarkSymbol $value.NoBalance }}</td>
 				<td align='right' class='break'>{{ numPrinter $value.Chunks }}</td>
+				<td align='center'><button class='btn'
+					onClick="javascript:loadData('/bond/chart/namespaces/{{$value.ID}}'); return false;">
+					<i class='fa fa-pie-chart' style='font-size: .8em;'></i></button></td>
 			</tr>
 		{{end}}
 	{{end}}
@@ -284,7 +302,7 @@ const (
 	<div style='float: left;'>
 	<table><caption>Bond Tutorial</caption>
 	<tr><td>
-	<iframe width="480" height="270" src="https://www.youtube.com/embed/-sLjZNN-FgA?si=v7WgEghM-4cE7yOf" 
+	<iframe width="480" height="270" src="https://www.youtube.com/embed/tdUT_PLiRSs?si=q-WOmdGqwgJV8R0R" 
 		title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; 
 		picture-in-picture; web-share" allowfullscreen></iframe></td></tr></table></div>
 	`

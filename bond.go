@@ -69,7 +69,10 @@ func Run(fullVersion string) {
 	router.GET("/api/bond/v1.0/data/:attr", DataHandler)
 	router.GET("/favicon.ico", FaviconHandler)
 	router.GET("/bond/info", InfoHandler)
+
 	router.GET("/bond/charts/:attr", ChartsHandler)
+	router.GET("/bond/chart/shards/:shard", ShardChartHandler)
+	router.GET("/bond/chart/namespaces/:ns", NamespaceChartHandler)
 
 	addr := fmt.Sprintf(":%d", *port)
 	if listener, err := net.Listen("tcp", addr); err != nil {

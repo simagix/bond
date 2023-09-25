@@ -23,7 +23,7 @@ import (
 
 var instance *ConfigDB
 
-// GetLogv2 returns Logv2 instance
+// GetConfigDB returns ConfigDB instance
 func GetConfigDB() *ConfigDB {
 	if instance == nil {
 		instance = &ConfigDB{}
@@ -47,6 +47,8 @@ type ConfigCollection struct {
 	NoBalance bool   `bson:"noBalance"`
 	Unique    bool   `bson:"unique"`
 	UUID      primitive.Binary
+
+	shards map[string]int `bson:"shard"`
 }
 
 type ConfigDatabase struct {
@@ -61,8 +63,8 @@ type ConfigMongos struct {
 	ID                *string             `bson:"_id"`
 	MongoVersion      *string             `bson:"mongoVersion"`
 	Ping              *primitive.DateTime `bson:"ping"`
-	Up                *int64              `bson:"up"`
-	Waiting           *bool               `bson:"waiting"`
+	Up                int64               `bson:"up"`
+	Waiting           bool                `bson:"waiting"`
 }
 
 type ConfigShard struct {
@@ -72,6 +74,8 @@ type ConfigShard struct {
 	ID      *string `bson:"_id"`
 	MaxSize *int    `bson:"maxSize"`
 	State   *int    `bson:"state"`
+
+	namespaces map[string]int
 }
 
 type ConfigDB struct {
@@ -222,6 +226,7 @@ func (ptr *ConfigDB) GetShardingInfo() error {
 		var doc ConfigCollection
 		cursor.Decode(&doc)
 		ptr.CollectionsMap[doc.ID] = doc
+		doc.shards = map[string]int{}
 		ptr.uuid2NS[string(doc.UUID.Data)] = doc.ID
 	}
 	defer cursor.Close(ctx)
@@ -348,14 +353,22 @@ func (ptr *ConfigDB) GetChunksInfo() error {
 		tally := ptr.ShardsMap[doc.Shard]
 		tally.Jumbo += doc.Jumbo
 		tally.Chunks += doc.Chunks
-		ptr.ShardsMap[doc.Shard] = tally
-
+		if tally.namespaces == nil {
+			tally.namespaces = map[string]int{}
+		}
 		if chunk["uuid"] != nil {
 			doc.NS = ptr.uuid2NS[string(doc.UUID.Data)]
 		}
+		tally.namespaces[doc.NS] += doc.Chunks
+		ptr.ShardsMap[doc.Shard] = tally
+
 		ptr.Chunks = append(ptr.Chunks, doc)
 		cally := ptr.CollectionsMap[doc.NS]
 		cally.Chunks += doc.Chunks
+		if cally.shards == nil {
+			cally.shards = map[string]int{}
+		}
+		cally.shards[doc.Shard] += doc.Chunks
 		ptr.CollectionsMap[doc.NS] = cally
 	}
 	defer cursor.Close(ctx)
@@ -396,18 +409,25 @@ func (ptr *ConfigDB) CheckWarnings() error {
 	if len(ptr.Mongos) == 0 {
 		ptr.Warnings = append(ptr.Warnings, printer.Sprintf("No mongos instance was found, probably a restored cluster from a config database dump."))
 	} else {
-		count := 0
+		fallen := 0
+		mismatched := 0
 		for _, value := range ptr.Mongos {
+			if !value.Waiting {
+				fallen++
+			}
 			toks := strings.Split(*value.MongoVersion, ".")
 			if len(toks) < 2 {
 				continue
 			}
 			if strings.Join(toks[:2], ".") != ptr.MajorVersion {
-				count++
+				mismatched++
 			}
 		}
-		if count > 0 {
-			ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Mismatched major version of  mongos: %d.", count))
+		if fallen > 0 {
+			ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Fallen mongos: %d.", fallen))
+		}
+		if mismatched > 0 {
+			ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Maverick mongos (mismatched major version): %d.", mismatched))
 		}
 	}
 	count := 0
@@ -432,7 +452,7 @@ func (ptr *ConfigDB) CheckWarnings() error {
 	str := CheckUpgradeRecommendation(ptr.MongoVersion)
 	if str != "" {
 		ptr.IsUpgrade = true
-		ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Suggest upgrade to latest MongoDB version, see %s for details.", str))
+		ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Bad Apple: suggest upgrade to latest MongoDB version, see %s for details.", str))
 	}
 	return nil
 }

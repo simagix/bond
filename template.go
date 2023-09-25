@@ -50,7 +50,7 @@ const headers = `<!DOCTYPE html>
     }
     caption {
       caption-side: top;
-      font-size: 1em;
+      font-size: 1.25em;
       font-weight: bold;
 	    text-align: left;
     }
@@ -63,27 +63,27 @@ const headers = `<!DOCTYPE html>
       color: var(--text-color);
       font-weight: bold;
       padding: 0.3rem;
-      font-size: 0.9em;
+      font-size: 1em;
       text-align: center;
     }
     td {
       background-color: var(--row-color);
       padding: 0.1rem;
-      font-size: 0.9em;
+      font-size: 1em;
     }
     tr:nth-child(even) td {
       background-color: white;
     }
     .rowtitle {
       vertical-align: middle;
-      font-size: .8em;
+      font-size: 1em;
       font-weight: bold;
       word-break: break-all;
       padding: 5px 5px;
     }
     .break {
       vertical-align: middle;
-      font-size: .8em;
+      font-size: 1em;
       word-break: break-all;
       padding: 5px 5px;
     }
@@ -101,7 +101,7 @@ const headers = `<!DOCTYPE html>
     }
     ul, ol {
       #font-family: Consolas, monaco, monospace;
-      font-size: .8em;
+      font-size: 1em;
     }
     .btn {
       background-color: transparent;
@@ -115,7 +115,7 @@ const headers = `<!DOCTYPE html>
       border-radius: .25em;
     }
     .btn:hover {
-      background-color: var(--header-color);
+      background-color: var(--accent-color-2);
       color: #FFF;
     }
     .button { 
@@ -259,6 +259,13 @@ const headers = `<!DOCTYPE html>
     @keyframes spin {
       0% { transform: rotate(0deg); }
       100% { transform: rotate(360deg); }
+    }
+    .chart {
+      background-color: var(--row-color);;
+      border: solid;
+      padding: 10px 10px;
+      margin: 10px 10px;
+      border-radius: .5em;
     }
   </style>
   <script>

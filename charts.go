@@ -7,10 +7,48 @@ package bond
 
 import (
 	"html/template"
-	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
+
+func GetPieChartTemplate() (*template.Template, error) {
+	html := GetContentHTML()
+	html += `<div id='bondChart' class='chart' style="clear: left;"></div></body></html>`
+	html += `
+{{ if .NameValues }}
+<script>
+	setChartType();
+	google.charts.load('current', {'packages':['corechart']});
+	google.charts.setOnLoadCallback(drawChart);
+
+	function drawChart() {
+		var data = google.visualization.arrayToDataTable([
+			['Name', 'Value'],
+	{{range $i, $v := .NameValues}}
+			['{{$v.Name}}', {{$v.Value}}],
+	{{end}}
+		]);
+		// Set chart options
+		var options = {
+			'backgroundColor': { 'fill': 'transparent' },
+			'title': '{{.Title}}',
+			'width': '100%',
+			'height': 480,
+			'titleTextStyle': {'fontSize': 20},
+			'slices': {},
+			'legend': { 'position': 'bottom' } };
+		options.slices[data.getSortedRows([{column: 1, desc: true}])[0]] = {offset: 0.1};
+		// Instantiate and draw our chart, passing in some options.
+		var chart = new google.visualization.PieChart(document.getElementById('bondChart'));
+		chart.draw(data, options);
+	}
+</script>
+{{else}}
+	<div align='center' class='btn'><span style='color: red'>no data found</span></div>
+{{end}}`
+
+	return template.New("bond").Funcs(template.FuncMap{}).Parse(html)
+}
 
 // GetChartTemplate returns HTML
 func GetChartTemplate(chartType string) (*template.Template, error) {
@@ -22,10 +60,7 @@ func GetChartTemplate(chartType string) (*template.Template, error) {
 	} else if chartType == T_CHUNK_SPLITS {
 		html += ChunkSplitsChartHTML
 	}
-	html += `
-  	<div id='bondChart' style="width: 100%; clear: left;"></div>
-  
-		</body></html>`
+	html += `<div id='bondChart' class='chart' style="clear: left;"></div></body></html>`
 
 	return template.New("bond").Funcs(template.FuncMap{
 		"ISODate": func(t *primitive.DateTime) string {
@@ -34,18 +69,6 @@ func GetChartTemplate(chartType string) (*template.Template, error) {
 			}
 			layout := "2006-01-02T15:04:05Z"
 			return t.Time().Format(layout)
-		},
-		"toSeconds": func(n float64) float64 {
-			return n / 1000
-		},
-		"substr": func(str string, n int) string {
-			return str[:n]
-		},
-		"epoch": func(d string, s string) int64 {
-			dfmt := "2016-01-02T23:59:59"
-			sdt, _ := time.Parse("2006-01-02T15:04:05", s+dfmt[len(s):])
-			dt, _ := time.Parse("2006-01-02T15:04:05", d+dfmt[len(d):])
-			return dt.Unix() - sdt.Unix()
 		}}).Parse(html)
 }
 
@@ -61,7 +84,7 @@ const (
 
 	function drawChart() {
 		var data = google.visualization.arrayToDataTable([
-			['Date/Time', 'Execution Time'],
+			['Date/Time', 'Average Execution Time'],
 
 	{{range $i, $v := .Config.Actions.BalancerRounds}}
 		[new Date("{{ISODate $v.Time}}"), {{$v.AverageExecutionTime}}],
@@ -77,10 +100,9 @@ const (
 			'height': 480,
 			'titleTextStyle': {'fontSize': 20},
 			'explorer': { actions: ['dragToZoom', 'rightClickToReset'] },
-			'legend': { 'position': 'right' } };
+			'legend': { 'position': 'bottom' } };
 		// Instantiate and draw our chart, passing in some options.
 		var chart = new google.visualization.ColumnChart(document.getElementById('bondChart'));
-		// var chart = new google.visualization.LineChart(document.getElementById('bondChart'));
 		chart.draw(data, options);
 	}
 </script>
@@ -99,7 +121,7 @@ const (
 
 	function drawChart() {
 		var data = google.visualization.arrayToDataTable([
-			['Date/Time', 'Chunks Moved', 'Error Count'],
+			['Date/Time', 'No. of Chunks Moved', 'Error Count'],
 
 	{{range $i, $v := .Config.Actions.BalancerRounds}}
 		[new Date("{{ISODate $v.Time}}"), {{$v.TotalChunksMoved}}, {{$v.TotalErrors}}],
@@ -116,10 +138,9 @@ const (
 			'isStacked': true,
 			'titleTextStyle': {'fontSize': 20},
 			'explorer': { actions: ['dragToZoom', 'rightClickToReset'] },
-			'legend': { 'position': 'right' } };
+			'legend': { 'position': 'bottom' } };
 		// Instantiate and draw our chart, passing in some options.
 		var chart = new google.visualization.ColumnChart(document.getElementById('bondChart'));
-		// var chart = new google.visualization.LineChart(document.getElementById('bondChart'));
 		chart.draw(data, options);
 	}
 </script>
@@ -138,7 +159,7 @@ const (
 
 	function drawChart() {
 		var data = google.visualization.arrayToDataTable([
-			['Date/Time', 'Splits'],
+			['Date/Time', 'No. of Splits'],
 
 	{{range $i, $v := .Config.Changes.Splits}}
 		[new Date("{{ISODate $v.Time}}"), {{$v.Total}}],
@@ -154,10 +175,9 @@ const (
 			'height': 480,
 			'titleTextStyle': {'fontSize': 20},
 			'explorer': { actions: ['dragToZoom', 'rightClickToReset'] },
-			'legend': { 'position': 'right' } };
+			'legend': { 'position': 'bottom' } };
 		// Instantiate and draw our chart, passing in some options.
 		var chart = new google.visualization.ColumnChart(document.getElementById('bondChart'));
-		// var chart = new google.visualization.LineChart(document.getElementById('bondChart'));
 		chart.draw(data, options);
 	}
 </script>
