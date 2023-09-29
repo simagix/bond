@@ -14,7 +14,7 @@ This script, tested on Linux, macOS, and Windows, is like magic, but you'll also
 
 **Connecting with Bond:**
 4-5.
-Bond offers versatile connection options tailored to your environment. Whether you're running a sharded cluster through a mongos instance, or operating in an isolated setting, Bond has you covered. It seamlessly connects to your sharded cluster via a mongos instance for instant insights. And for those in isolated environments, Bond allows you to restore to a standalone server, using a backup from your config database. Just remember to include a backup of the mongo-s collection for a smooth transition. You'll even find a handy script for backup and restoration of a config database example, making the process as straightforward as it gets.
+Bond offers versatile connection options tailored to your environment. Whether you're running a sharded cluster through a mongo-s instance, or operating in an isolated setting, Bond has you covered. It seamlessly connects to your sharded cluster via a mongo-s instance for instant insights. And for those in isolated environments, Bond allows you to restore to a standalone server, using a backup from your config database. Just remember to include a backup of the mongo-s collection for a smooth transition. You'll even find a handy script for backup and restoration of a config database example, making the process as straightforward as it gets.
 
 **Summary and Alerts:**
 6-8.
