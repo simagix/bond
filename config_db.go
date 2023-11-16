@@ -260,6 +260,9 @@ func (ptr *ConfigDB) CheckLogs() error {
 	if err = changes.GetSplits(); err != nil {
 		return err
 	}
+	if err = changes.GetMoveChunkErrors(); err != nil {
+		return err
+	}
 	ptr.Changes = changes
 	return nil
 }
@@ -447,6 +450,9 @@ func (ptr *ConfigDB) CheckWarnings() error {
 	}
 	if !*ptr.Changes.Stats.Capped {
 		ptr.Warnings = append(ptr.Warnings, printer.Sprintf("Collection config.changelog is not a capped collection."))
+	}
+	if ptr.Changes.Stats.TotalChunkMoveErrors > 0 {
+		ptr.Warnings = append(ptr.Warnings, printer.Sprintf("A total of %d chunk move errors, go evaluate mongod logs and FTDC data.", ptr.Changes.Stats.TotalChunkMoveErrors))
 	}
 
 	str := CheckUpgradeRecommendation(ptr.MongoVersion)

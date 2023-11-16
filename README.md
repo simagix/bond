@@ -5,5 +5,9 @@
 ## Build Instructions
 Build instructions and user's guide are available at [![Chen's Bond - MongoDB Sharded Cluster Analysis Tool](https://img.youtube.com/vi/equz1z0igv0/0.jpg)](https://youtu.be/equz1z0igv0).
 
+## Changes
+### v0.2.0
+- Added *Chunk Move Errors*
+
 ## License
 [Apache-2.0 License](LICENSE)
