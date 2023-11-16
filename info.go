@@ -27,7 +27,7 @@ func GetInfoTemplate() (*template.Template, error) {
 		<tr><td style='border:none; vertical-align: top; padding: 5px; background-color: var(--background-color);'>
 			<img class='rotate23' src='data:image/png;base64,{{ assignConsultant $flag }}'></img></td>
 			<td class='summary'>{{consultantIntro $flag}} ` + SummaryHTML + "</td></tr></table></div>"
-	html += InfoHTML + LogsHTML + BondVideoHTML + MongosHTML + ShardsHTML + DatabasesHTML + CollectionsHTML
+	html += InfoHTML + LogsHTML + BondVideoHTML + MongosHTML + ChunkMoveErrorsHTML + ShardsHTML + DatabasesHTML + CollectionsHTML
 	html += "</body></html>"
 	return template.New("bond").Funcs(template.FuncMap{
 		"add": func(a int, b int) int {
@@ -170,14 +170,15 @@ const (
 			<tr><td align='left' class='rowtitle'>Number of Sharded Collections</td><td align='right' class='break'>{{ numPrinter (len .Config.CollectionsMap) }}</td></tr>
 
 		{{if ne .Actionlog.Capped nil}}
-			<tr><td align='left' class='rowtitle'>Total Chunks Moved</td><td align='right' class='break'>{{ numPrinter .Actionlog.TotalChunksMoved }}</td></tr>
-			<tr><td align='left' class='rowtitle'>Total Chunk Move Error</td><td align='right' class='break'>{{ .Actionlog.TotalErrors }}</td></tr>
-			<tr><td align='left' class='rowtitle'>Average Chunk Move Time</td><td align='right' class='break'>{{ getDurationFromMilliseconds (.Actionlog.AverageExecutionTime) }}</td></tr>
-			<tr><td align='left' class='rowtitle'>Longest Chunk Move Time</td><td align='right' class='break'>{{ getDurationFromMilliseconds (.Actionlog.MaxExecutionTime) }}</td></tr>
+			<tr><td align='left' class='rowtitle'>Number of Balancer Rounds</td><td align='right' class='break'>{{ numPrinter .Actionlog.TotalChunksMoved }}</td></tr>
+			<tr><td align='left' class='rowtitle'>Number of Errors</td><td align='right' class='break'>{{ .Actionlog.TotalErrors }}</td></tr>
+			<tr><td align='left' class='rowtitle'>Average Balancer Round Time</td><td align='right' class='break'>{{ getDurationFromMilliseconds (.Actionlog.AverageExecutionTime) }}</td></tr>
+			<tr><td align='left' class='rowtitle'>Longest Balancer Round Time</td><td align='right' class='break'>{{ getDurationFromMilliseconds (.Actionlog.MaxExecutionTime) }}</td></tr>
 		{{end}}
 
 		{{if ne .Changelog.Capped nil}}
 			<tr><td align='left' class='rowtitle'>Total Chunk Splits</td><td align='right' class='break'>{{ numPrinter .Changelog.TotalSplits }}</td></tr>
+			<tr><td align='left' class='rowtitle'>Total Chunk Move Errors</td><td align='right' class='break'>{{ numPrinter .Changelog.TotalChunkMoveErrors }} {{getWarningSymbol (eq .Changelog.TotalChunkMoveErrors 0) }}</td></tr>
 		{{end}}
 		</table></div>`
 
@@ -193,6 +194,25 @@ const (
 			<tr><td align='left' class='rowtitle'>Is config.changelog capped?</td><td align='center' class='break'>{{getCheckMarkSymbol .Changelog.Capped}}{{getWarningSymbol .Changelog.Capped}}</td></tr>
 			<tr><td align='left' class='rowtitle'>Size of config.changelog</td><td align='right' class='break'>{{getStorageSize .Changelog.MaxSize}}</td></tr>
 		{{end}}
+		</table></div>`
+
+	// chunkMove errors
+	ChunkMoveErrorsHTML = `
+	{{if gt .Changelog.TotalChunkMoveErrors 0}}
+		<div style='float: left;'>
+		<table><caption>Chunk Move Errors</caption><tr><th>#</th>
+		<th>Donor Shard</th><th>Recipient Shard</th><th>Total</th></th>
+		{{$cnt:=0}}
+		{{range $n, $value := .Config.Changes.ChunkMoveErrors}}
+			{{$cnt = add $cnt 1}}
+				<tr>
+					<td align='right' class='break'>{{ $cnt }}</td>
+					<td align='left' class='break'>{{$value.From}}</td>
+					<td align='left' class='break'>{{ $value.To }}</td>
+					<td align='right' class='break'>{{ numPrinter $value.Total }}</td>
+				</tr>
+		{{end}}
+	{{end}}
 		</table></div>`
 
 	// shards

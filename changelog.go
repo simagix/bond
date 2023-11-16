@@ -14,18 +14,26 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+type ChunkMoveError struct {
+	From  string `bson:"from"`
+	To    string `bson:"to"`
+	Total int    `bson:"total"`
+}
+
 type Split struct {
 	Time  primitive.DateTime `bson:"time"`
 	Total int                `bson:"total"`
 }
 
 type ChangeLog struct {
-	Splits []Split `bson:"splits"`
+	ChunkMoveErrors []ChunkMoveError `bson:"chunkMoveErrors"`
+	Splits          []Split          `bson:"splits"`
 
 	Stats struct {
-		Capped      *bool `bson:"capped"`
-		MaxSize     int64 `bson:"maxSize"`
-		TotalSplits int   `bson:"total"`
+		Capped               *bool `bson:"capped"`
+		MaxSize              int64 `bson:"maxSize"`
+		TotalChunkMoveErrors int   `bson:"totalChunkMoveErrors"`
+		TotalSplits          int   `bson:"totalSplits"`
 	} `bson:"stats"`
 	client *mongo.Client
 }
@@ -96,6 +104,51 @@ func (ptr *ChangeLog) GetSplits() error {
 		cursor.Decode(&doc)
 		ptr.Splits = append(ptr.Splits, doc)
 		ptr.Stats.TotalSplits += doc.Total
+	}
+	defer cursor.Close(ctx)
+	return nil
+}
+
+func (ptr *ChangeLog) GetMoveChunkErrors() error {
+	pipeline := bson.A{
+		bson.D{{Key: "$match", Value: bson.D{{Key: "what", Value: "moveChunk.error"}}}},
+		bson.D{
+			{Key: "$group",
+				Value: bson.D{
+					{Key: "_id",
+						Value: bson.D{
+							{Key: "from", Value: "$details.from"},
+							{Key: "to", Value: "$details.to"},
+						},
+					},
+					{Key: "total", Value: bson.D{{Key: "$sum", Value: 1}}},
+				},
+			},
+		},
+		bson.D{
+			{Key: "$project",
+				Value: bson.D{
+					{Key: "_id", Value: 0},
+					{Key: "from", Value: "$_id.from"},
+					{Key: "to", Value: "$_id.to"},
+					{Key: "total", Value: 1},
+				},
+			},
+		},
+		bson.D{{Key: "$sort", Value: bson.D{{Key: "total", Value: -1}}}},
+	}
+	ctx := context.Background()
+	db := ptr.client.Database("config")
+	opts := options.Aggregate().SetAllowDiskUse(true)
+	cursor, err := db.Collection("changelog").Aggregate(ctx, pipeline, opts)
+	if err != nil {
+		return err
+	}
+	for cursor.Next(ctx) {
+		var doc ChunkMoveError
+		cursor.Decode(&doc)
+		ptr.ChunkMoveErrors = append(ptr.ChunkMoveErrors, doc)
+		ptr.Stats.TotalChunkMoveErrors += doc.Total
 	}
 	defer cursor.Close(ctx)
 	return nil

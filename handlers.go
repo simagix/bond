@@ -29,8 +29,8 @@ type Chart struct {
 
 var charts = map[string]Chart{
 	"instruction": {0, "select a chart", "", ""},
-	T_MIGRATION_TIME: {1, "Average Chunk Migration Time",
-		"Display average migration time", "/bond/charts/" + T_MIGRATION_TIME},
+	T_MIGRATION_TIME: {1, "Average Balancer Round Time",
+		"Display average balancer round time", "/bond/charts/" + T_MIGRATION_TIME},
 	T_MIGRATION_STATS: {2, "Chunk Migration Counts",
 		"Display average migration time", "/bond/charts/" + T_MIGRATION_STATS},
 	T_CHUNK_SPLITS: {3, "No. of Chunk Splits",
