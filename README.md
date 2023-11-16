@@ -9,5 +9,7 @@ Build instructions and user's guide are available at [![Chen's Bond - MongoDB Sh
 ### v0.2.0
 - Added *Chunk Move Errors*
 
+![Chunk Move Errors](docs/chunk_move_errors.png)
+
 ## License
 [Apache-2.0 License](LICENSE)
