@@ -159,7 +159,7 @@ func (ptr *ConfigDB) GetShardingInfo() error {
 	// check version
 	err := db.Collection("version").FindOne(ctx, bson.D{}).Decode(&ptr.Version)
 	if err != nil {
-		return err
+		log.Println("check version error", err)
 	}
 
 	// get shards
